@@ -195,6 +195,9 @@ scalar_functions:
   - name: gte_datetime
     unsupported: True
   - name: substring
+    #unsupported because Sf returns number of UTF-8 characters substring('😊a😊b😊😊', 1, 3)
+    #required_options:
+      #negative_start: WRAP_FROM_END
     unsupported: True
   - name: concat
     local_name: "||"
@@ -229,11 +232,24 @@ scalar_functions:
   - name: lpad
   - name: rpad
   - name: left
+    #unsupported because Sf returns number of UTF-8 characters for Left('😔😄😔😄', 2)
     unsupported: True
   - name: right
+    #unsupported because Sf returns number of UTF-8 characters for Right('😔😄😔😄', 2)
     unsupported: True
   - name: string_split
     unsupported: True
+  - name: starts_with
+    local_name: "startswith"
+    required_options:
+      case_sensitivity: CASE_SENSITIVE
+  - name: ends_with
+    local_name: "endswith"
+    required_options:
+      case_sensitivity: CASE_SENSITIVE
+  - name: contains
+    required_options:
+      case_sensitivity: CASE_SENSITIVE
   - name: ln
     required_options:
       on_log_zero: ERROR
