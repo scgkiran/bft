@@ -1,0 +1,70 @@
+base_uri: https://github.com/substrait-io/substrait/blob/main/extensions/substrait/extensions/functions_arithmetic.yaml
+function: max
+cases:
+- group: basic
+  description: Basic examples without any special cases
+  tests:
+  - (int_col): 20|i8
+    data:
+    - column: [20, -3, 1, -10, 0, 5]
+      type: i8
+      name: int_col
+  - (col1): 32767|i16
+    data:
+    - column: [-32768, 32767, 20000, -30000]
+      type: i16
+      name: col1
+  - (col1): 214748647|i32
+    data:
+    - column: [-214748648, 214748647, 21470048, 4000000]
+      type: i32
+      name: col1
+  - (col1): 2000000000|i64
+    data:
+    - column: [2000000000, -3217908979, 629000000, -100000000, 0, 987654321]
+      type: i64
+      name: col1
+  - (col1): 5.0|fp32
+    data:
+    - column: [2.5, 0, 5.0, -2.5, -7.5]
+      type: fp32
+      name: col1
+  - (col1): 1.5e+308|fp64
+    data:
+    - column: [1.5e+308, 1.5e+10, -1.5e+8, -1.5e+7, -1.5e+70]
+      type: fp64
+      name: col1
+
+- group: null_handling
+  description: Examples with null as input or output
+  tests:
+  - (col1): Null|i16
+    data:
+    - column: [Null, Null, Null]
+      type: i16
+      name: col1
+  - (col1): Null|i16
+    data:
+    - column: []
+      type: i16
+      name: col1
+  - (col1): 2000000000|i64
+    data:
+    - column: [2000000000, Null, 629000000, -100000000, Null, 987654321]
+      type: i64
+      name: col1
+  - (col1): inf|fp64
+    data:
+    - column: [Null, inf]
+      type: fp64
+      name: col1
+  - (col1): -1.5e+7|fp64
+    data:
+    - column: [Null, -inf, -1.5e+8, -1.5e+7, -1.5e+70]
+      type: fp64
+      name: col1
+  - (col1): 1.5e+308|fp64
+    data:
+    - column: [1.5e+308, 1.5e+10, Null, -1.5e+7, Null]
+      type: fp64
+      name: col1

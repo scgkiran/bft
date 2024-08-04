@@ -1,0 +1,32 @@
+base_uri: https://github.com/substrait-io/substrait/blob/main/extensions/substrait/extensions/functions_arithmetic_decimal.yaml
+function: power
+cases:
+- group: basic
+  description: Basic examples without any special cases
+  tests:
+  - (8|decimal, 2|decimal<38, 0>): 64|fp64
+  - (1.0|decimal, -1.0|decimal<38, 0>): 1.0|fp64
+  - (2.0|decimal<38, 0>, -2.0|decimal<38, 0>): 0.25|fp64
+  - (13|decimal<38, 0>, 10|decimal<38, 0>): 137858491849|fp64
+- group: result_more_than_input_precision
+  description: Examples demonstrating result with more precision than input
+  tests:
+  - (16|decimal<2, 0>, 4|decimal<38, 0>): 65536|fp64
+- group: floating_exception
+  description: Examples demonstrating exceptional floating point cases
+  tests:
+  - (1.5e+10|decimal<38, 0>, 1.5e+20|decimal<38, 0>): inf|fp64
+  - (-16|decimal<4,0>, 1001|decimal<4,0>): -inf|fp64
+- group: complex_number
+  description: Examples demonstrating complex number output
+  options:
+    complex_number_result: NAN
+  tests:
+  - (-1|decimal, 0.5|decimal<38,1>): nan|fp64
+- group: complex_number
+  description: 'Examples demonstrating complex number output tests: complex_number_result
+    with ERROR'
+  options:
+    complex_number_result: ERROR
+  tests:
+  - (-1|decimal, 0.5|decimal<38,1>): error|fp64

@@ -1,0 +1,47 @@
+base_uri: https://github.com/substrait-io/substrait/blob/main/extensions/substrait/extensions/functions_arithmetic.yaml
+function: add
+cases:
+- group: basic
+  description: Basic examples without any special cases
+  tests:
+  - (120|i8, 5|i8): 125|i8
+  - (100|i16, 100|i16): 200|i16
+  - (30000|i32, 30000|i32): 60000|i32
+  - (2000000000|i64, 2000000000|i64): 4000000000|i64
+- group: overflow with error
+  description: Examples demonstrating overflow behavior
+  options:
+    overflow: ERROR
+  tests:
+  - (120|i8, 10|i8): error
+  - (30000|i16, 30000|i16): error
+  - (2000000000|i32, 2000000000|i32): error
+  - (9223372036854775807|i64, 1|i64): error
+- group: overflow with saturate
+  description: Examples demonstrating overflow behavior
+  options:
+    overflow: SATURATE
+  tests:
+  - (120|i8, 10|i8): 127|i8
+  - (-120|i8, -10|i8): -128|i8
+- group: overflow with silent
+  description: Examples demonstrating overflow behavior
+  options:
+    overflow: SILENT
+  tests:
+  - (120|i8, 10|i8): undefined
+- group: floating_exception
+  description: Examples demonstrating exceptional floating point cases
+  tests:
+  - (1.5e+308|fp64, 1.5e+308|fp64): inf|fp64
+  - (-1.5e+308|fp64, -1.5e+308|fp64): -inf|fp64
+- group: rounding
+  description: Examples demonstrating floating point rounding behavior
+  options:
+    rounding: TIE_TO_EVEN
+  tests:
+  - (4.5|fp32, 2.5000007152557373046875|fp32): 7.00000095367431640625|fp32
+- group: types
+  description: Examples demonstrating behavior of different data types
+  tests:
+  - (4.5|fp64, 2.5000007152557373046875|fp64): 7.0000007152557373046875|fp64

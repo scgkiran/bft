@@ -1,0 +1,31 @@
+base_uri: https://github.com/substrait-io/substrait/blob/main/extensions/substrait/extensions/functions_datetime.yaml
+function: lt
+cases:
+- group: timestamps
+  description: Examples using the timestamp type
+  tests:
+  - ('2016-12-31 13:30:15'|timestamp, '2017-12-31 13:30:15'|timestamp): true|boolean
+  - ('2018-12-31 13:30:15'|timestamp, '2017-12-31 13:30:15'|timestamp): false|boolean
+- group: timestamp_tz
+  description: Examples using the timestamp_tz type
+  tests:
+  - ('1999-01-08 01:05:05 PST'|timestamp_tz, '1999-01-08 04:05:06 EST'|timestamp_tz): true|boolean
+  - ('1999-01-08 01:05:06 PST'|timestamp_tz, '1999-01-08 04:05:06 EST'|timestamp_tz): false|boolean
+- group: date
+  description: Examples using the date type
+  tests:
+  - ('2020-12-30'|date, '2020-12-31'|date): true|boolean
+  - ('2020-12-31'|date, '2020-12-30'|date): false|boolean
+- group: interval
+  description: Examples using the interval type
+  tests:
+  - (INTERVAL '5 DAY'|interval, INTERVAL '6 DAY'|interval): true|boolean
+  - (INTERVAL '7 DAY'|interval, INTERVAL '6 DAY'|interval): false|boolean
+  - (INTERVAL '5 YEAR'|interval, INTERVAL '6 YEAR'|interval): true|boolean
+  - (INTERVAL '7 YEAR'|interval, INTERVAL '6 YEAR'|interval): false|boolean
+- group: null_input
+  description: Examples with null args or return
+  tests:
+  - (null|interval, INTERVAL '5 DAY'|interval): null|boolean
+  - (null|date, '2020-12-30'|date): null|boolean
+  - (null|timestamp, '2018-12-31 13:30:15'|timestamp): null|boolean
