@@ -6,11 +6,11 @@ def convert_yaml(input_file, output_file):
     with open(input_file, 'r') as file:
         old_yaml_data = yaml.safe_load(file)
 
-    new_yaml_data = {
-        'base_uri': old_yaml_data['base_uri'],
-        'function': old_yaml_data['function'],
-        'cases': []
-    }
+    output = [
+        "### SUBSTRAIT_SCALAR_TEST: 1.0\n",
+        f"### SUBSTRAIT_INCLUDE: {old_yaml_data['base_uri']}\n"
+    ]
+    function = old_yaml_data['function']
 
     description_map = {}
     groups = {}
@@ -46,38 +46,46 @@ def convert_yaml(input_file, output_file):
         args = case.get('args', [])
         result = case.get('result', {})
 
+        # if args.value is array and if it has 'None' value, then replace it with 'Null'
+        for arg in args:
+            if type(arg['value']) is list:
+                arg['value'] = f"[{', '.join(['Null' if x is None else str(x) for x in arg['value']])}]"
+
         # Construct the testcases using new format
         if args and result:
             args_str = ', '.join(
-                [f"{arg['value']}|{arg['type']}" for arg in args])
+                [f"{arg['value']}::{arg['type']}" for arg in args])
             if result.get('special') is None:
-                result_str = f"{result['value']}|{result['type']}"
+                value = 'Null' if result['value'] is None else result['value']
+                result_str = f"{value}::{result['type']}"
             else:
                 result_str = result['special']
-            test = {f"({args_str})": result_str}
+            test = {f"{args_str}": result_str}
             test_group['tests'].append(test)
 
         # Add the test group to the list of cases
         if group_name in groups:
             groups[group_name]['tests'] += test_group['tests']
-            # if options is None or test_group.get('options') is groups[group_name]['options']:
-            #     groups[group_name]['tests'] += test_group['tests']
-            # else:
-            #     test_group_name = f"{group_name} tests: {options_str}"
-            #     test_group['group'] = test_group_name
-            #     if test_group['description'] == '':
-            #         test_group['description'] = f"{groups[group_name]['description']} tests: {options_str}"
-            #     groups[test_group_name] = test_group
         else:
             groups[group_name] = test_group
 
     for _, group_tests in groups.items():
-        new_yaml_data['cases'].append(group_tests)
+        output.append(f"\n# {group_tests['group']}: {group_tests['description']}\n")
+        option_str = get_option_str(group_tests.get('options', None))
+        for test in group_tests['tests']:
+            for arg_list, result in test.items():
+                output.append(f"{function}({arg_list}){option_str} = {result}\n")
 
     with open(output_file, 'w') as file:
-        yaml.dump(new_yaml_data, file, sort_keys=False, default_flow_style=False)
-
+        file.writelines(output)
     print(f"Conversion complete. The new format has been saved to '{output_file}'.")
+
+
+def get_option_str(options):
+    if options is None:
+        return ''
+    option_strs = [f"{k}:{v}" for k, v in options.items()]
+    return f" [{', '.join(option_strs)}]"
 
 
 input_files = [
@@ -93,11 +101,6 @@ def main():
         input_file = input_path.split('/')[-1]
         output_path = f"/Users/chandra/junk/{input_file}"
         convert_yaml(input_path, output_path)
-
-    with open('cases_new/arithmetic/add.yaml', 'r') as file:
-        yam_data = yaml.safe_load(file)
-
-    print(yam_data)
 
 
 if __name__ == '__main__':
